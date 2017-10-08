@@ -1,0 +1,37 @@
+{
+  "name": "@mrhen/instant-insanity",
+  "version": "1.0.0",
+  "description": "Instant Insanity",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "docker-compose up build",
+    "deploy": "git-directory-deploy --directory dist --branch gh-pages",
+    "postinstall": "docker-compose up install",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "docker-compose up watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrHen/instant-insanity.git"
+  },
+  "author": "Adam Babcock",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MrHen/instant-insanity/issues"
+  },
+  "homepage": "https://github.com/MrHen/instant-insanity#readme",
+  "devDependencies": {
+    "css-loader": "^0.28.7",
+    "git-directory-deploy": "^1.5.1",
+    "html-loader": "^0.5.1",
+    "html-webpack-plugin": "^2.30.1",
+    "style-loader": "^0.18.2",
+    "ts-loader": "^2.3.7",
+    "typescript": "^2.5.2",
+    "webpack": "^3.6.0"
+  },
+  "dependencies": {
+    "d3": "^4.11.0",
+    "lodash": "^4.17.4"
+  }
+}
