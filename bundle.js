@@ -9455,7 +9455,7 @@ function build() {
         .style("width", "1.5rem")
         .style("padding", "0.25rem")
         .classed("goal", true)
-        .style('top', function (c) { return yPositions[c.face]; });
+        .style('top', function (g) { return yPositions[g.face]; });
 }
 function paint(shouldTransition) {
     if (shouldTransition === void 0) { shouldTransition = true; }
@@ -9475,7 +9475,10 @@ function paint(shouldTransition) {
         .style('background-color', function (g) { return goalBackground[g.valid]; });
 }
 function rotateFrom(face) {
-    var cube = d3.select(this.parentNode).datum();
+    if (!this.parentElement) {
+        return;
+    }
+    var cube = d3.select(this.parentElement).datum();
     rotateCube(cube, rotations[face.face]);
     validate(state);
     saveState(state);
@@ -9485,7 +9488,7 @@ function rotateCube(cube, rotation) {
     for (var i in cube) {
         var face = cube[i];
         var next = rotation[face.face];
-        face.face = rotation[face.face];
+        face.face = next;
     }
 }
 function validate(state) {
@@ -9535,19 +9538,19 @@ function initialState() {
     var goals = [
         {
             'face': 'up',
-            'valid': false
+            'valid': 'invalid'
         },
         {
             'face': 'front',
-            'valid': false
+            'valid': 'invalid'
         },
         {
             'face': 'down',
-            'valid': false
+            'valid': 'invalid'
         },
         {
             'face': 'back',
-            'valid': false
+            'valid': 'invalid'
         }
     ];
     return {
