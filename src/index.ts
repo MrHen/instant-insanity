@@ -13,7 +13,7 @@ import * as _ from 'lodash';
 //     | L |
 //     +---+
 
-var rotations = {
+var rotations: RotationFrom = {
   'up': {
     'up': 'front',
     'back': 'up',
@@ -64,7 +64,7 @@ var rotations = {
   }
 }
 
-var xPositions = {
+var xPositions:FaceMap<string> = {
   'up': '3.5rem',
   'back': '3.5rem',
   'down': '3.5rem',
@@ -73,7 +73,7 @@ var xPositions = {
   'right': '6rem'
 }
 
-var yPositions = {
+var yPositions:FaceMap<string> = {
   'up': '1rem',
   'back': '8.5rem',
   'down': '6rem',
@@ -82,7 +82,7 @@ var yPositions = {
   'right': '3.5rem'
 }
 
-var opacity = {
+var opacity:FaceMap<string> = {
   'up': '1',
   'back': '1',
   'down': '1',
@@ -125,7 +125,7 @@ function build() {
   container
     .selectAll(".cube")
     .selectAll('.face')
-    .data((f) => f)
+    .data((f: Face[]) => f)
     .enter()
     .append("div")
     .classed("face", true)
@@ -136,7 +136,7 @@ function build() {
     .style("font-size", "1.25rem")
     .style("line-height", "1.5rem")
     .style("width", "1.5rem")
-    .html((f) => glyphs(f.value))
+    .html((f: Face) => glyphs(f.value))
 
   container
     .selectAll(".cube .face")
@@ -165,7 +165,7 @@ function build() {
     .style("width", "1.5rem")
     .style("padding", "0.25rem")
     .classed("goal", true)
-    .style('top', (c) => yPositions[c.face])
+    .style('top', (g: Goal) => yPositions[g.face])
 }
 
 function paint(shouldTransition = true) {
@@ -173,22 +173,26 @@ function paint(shouldTransition = true) {
     .selectAll('.face')
     .transition()
     .duration(shouldTransition ? 250 : 0)
-    .style('background-color', (f) => faceBackgrounds(f.value))
-    .style('opacity', (f) => opacity[f.face])
-    .style('top', (f) => yPositions[f.face])
-    .style('left', (f) => xPositions[f.face])
+    .style('background-color', (f: Face) => faceBackgrounds(f.value))
+    .style('opacity', (f: Face) => opacity[f.face])
+    .style('top', (f: Face) => yPositions[f.face])
+    .style('left', (f: Face) => xPositions[f.face])
 
   container
     .selectAll('.goal')
     .transition()
     .duration(shouldTransition ? 200 : 0)
     .delay(shouldTransition ? 50 : 0)
-    .style('background-color', (g) => goalBackground[g.valid])
+    .style('background-color', (g: Goal) => goalBackground[g.valid])
 }
 
-function rotateFrom (face) {
-  var cube = d3.select(this.parentNode).datum()
+function rotateFrom (this: Element, face: Face) {
+  if (!this.parentElement) {
+    return;
+  }
 
+  var cube = d3.select<Element, Face[]>(this.parentElement).datum()
+  
   rotateCube(cube, rotations[face.face])
   validate(state);
   saveState(state);
@@ -196,15 +200,15 @@ function rotateFrom (face) {
   paint();
 }
 
-function rotateCube (cube, rotation) {
+function rotateCube (cube: Face[], rotation: RotationTo) {
   for(var i in cube) {
     var face = cube[i]
     var next = rotation[face.face]
-    face.face = rotation[face.face]
+    face.face = next
   }
 }
 
-function validate (state) {
+function validate (state: GameState) {
   for(var i in state.goals) {
     var goal = state.goals[i]
     var faces = _.flatten(state.cubes)
@@ -214,8 +218,8 @@ function validate (state) {
   }
 }
 
-function initialState() {
-  var cubes = [
+function initialState(): GameState {
+  var cubes: Face[][] = [
     [
       { 'face': 'left',  'value': 'A' },
       { 'face': 'front', 'value': 'B' },
@@ -250,22 +254,22 @@ function initialState() {
     ]
   ]
 
-  var goals = [
+  var goals: Goal[] = [
     {
       'face': 'up',
-      'valid': false
+      'valid': 'invalid'
     },
     {
       'face': 'front',
-      'valid': false
+      'valid': 'invalid'
     },
     {
       'face': 'down',
-      'valid': false
+      'valid': 'invalid'
     },
     {
       'face': 'back',
-      'valid': false
+      'valid': 'invalid'
     }
   ]
 
@@ -275,7 +279,7 @@ function initialState() {
   }
 }
 
-function saveState(state) {
+function saveState(state: GameState) {
   var str = JSON.stringify(state)
   var b64 = btoa(str)
   localStorage.setItem('mrhen-insanity', b64);
@@ -295,4 +299,33 @@ function loadState() {
   } catch (e) {
     return null
   }
+}
+
+type Orientation = 'up' | 'down' | 'front' | 'back' | 'left' | 'right'
+
+interface GameState {
+  cubes: Face[][];
+  goals: Goal[];
+}
+
+interface Face {
+  face: Orientation;
+  value: string;
+}
+
+interface Goal {
+  face: Orientation;
+  valid: 'valid' | 'invalid';
+}
+
+type RotationFrom = FaceMap<RotationTo>
+type RotationTo =  FaceMap<Orientation>
+
+interface FaceMap<T> {
+  'up': T;
+  'down': T;
+  'front': T;
+  'back': T;
+  'left': T;
+  'right': T;
 }
